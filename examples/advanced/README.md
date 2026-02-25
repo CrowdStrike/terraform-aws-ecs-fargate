@@ -25,10 +25,13 @@ This example demonstrates a comprehensive, production-ready configuration with a
 
 Before running this example, ensure you have:
 
-1. **IAM Roles** - Existing execution and task roles with appropriate permissions
-2. **EFS File System** - Created EFS file system for application data
-3. **Secrets Manager Secrets** - Secrets containing database password and API key
-4. **ECR Images** - Both application and Falcon sensor images pushed to ECR
+1. **Container Images** - Both application and Falcon sensor images pushed to ECR
+2. **CrowdStrike Falcon CID** - Customer ID from your Falcon console
+3. **IAM Roles** - Existing execution and task roles with appropriate permissions
+4. **EFS File System** - Created EFS file system with mount targets in your VPC
+5. **Secrets Manager Secrets** - Secrets containing database password and API key
+6. **VPC and Networking** - Subnets and security groups configured for ECS tasks and EFS access
+7. **ECS Cluster** - Existing cluster to deploy the service (optional for task definition only)
 
 ## Usage
 

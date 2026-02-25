@@ -9,6 +9,15 @@ This example demonstrates the minimal configuration needed to deploy an ECS Farg
 - IAM execution role with basic ECS permissions
 - CloudWatch log group for container logs
 
+## Prerequisites
+
+Before running this example, ensure you have:
+
+1. **Container Images** - Both application and Falcon sensor images pushed to a container registry (ECR recommended)
+2. **CrowdStrike Falcon CID** - Your Customer ID from the Falcon console
+3. **AWS Permissions** - Ability to create ECS task definitions, IAM roles, and CloudWatch log groups
+4. **ECS Cluster** - An existing ECS cluster to run the task (optional for task definition creation)
+
 ## Usage
 
 1. Set your application and Falcon image URIs:
