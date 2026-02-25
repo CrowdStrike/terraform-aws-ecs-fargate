@@ -9,17 +9,12 @@ Terraform module for deploying CrowdStrike Falcon Container sensor with Amazon E
 
 ## Features
 
-- **Zero-Touch Integration** - Automatically wraps application containers with Falcon sensor
-- **Init Container Pattern** - Uses Falcon init container to inject sensor at runtime
-- **Fargate Native** - Designed specifically for AWS Fargate workloads
-- **GovCloud Compatible** - Automatically detects and uses correct ARN partitions for AWS GovCloud
-- **Flexible Configuration** - Supports all standard ECS task definition options
-- **IAM Management** - Optional IAM role creation with customizable policies
-- **CloudWatch Logging** - Integrated logging with configurable retention
-- **Sidecar Support** - Add additional sidecar containers alongside your app
-- **Volume Management** - Support for EFS, Docker volumes, and ephemeral storage
-- **Health Checks** - Container health check configuration
-- **Security Hardening** - Read-only root filesystem, custom Linux capabilities
+- Automatically wraps application containers with Falcon sensor
+- Uses Falcon init container to inject sensor at runtime
+- Designed specifically for AWS Fargate workloads
+- Supports all standard ECS task definition options
+- Optional IAM role creation with customizable policies
+- Integrated logging with configurable retention
 
 ## Prerequisites
 
@@ -37,15 +32,6 @@ Before using this module, you need:
    - Permissions to create ECS task definitions
    - IAM role creation permissions (if using `create_execution_role = true`)
    - ECR permissions to pull images
-
-## AWS GovCloud Support
-
-This module is **fully compatible with AWS GovCloud** regions. It automatically detects the AWS partition and uses the correct ARN format:
-
-- **Commercial AWS**: `arn:aws:...`
-- **AWS GovCloud**: `arn:aws-us-gov:...`
-
-No configuration changes needed - the module handles this automatically using the `aws_partition` data source.
 
 ## Architecture
 
@@ -70,8 +56,6 @@ This module creates an ECS task definition with:
 > **Note**: The Falcon sensor requires the `SYS_PTRACE` Linux capability to monitor processes. This module automatically adds this capability to your application container.
 
 > **Warning**: When using a read-only root filesystem (`app_readonly_root_filesystem = true`), ensure your application doesn't need to write to the root filesystem. The Falcon sensor files are mounted from a shared volume.
-
-> **Tip**: For production workloads, always specify explicit image tags (not `latest`) to ensure consistent deployments.
 
 ## Usage
 
