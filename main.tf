@@ -65,19 +65,25 @@ locals {
         try(var.app_linux_parameters.capabilities.add, []),
         ["SYS_PTRACE"]
       ))
-      drop = try(var.app_linux_parameters.capabilities.drop, [])
+      drop = tolist(try(var.app_linux_parameters.capabilities.drop, []))
     }
-    devices            = try(var.app_linux_parameters.devices, [])
+    devices            = tolist(try(var.app_linux_parameters.devices, []))
     initProcessEnabled = try(var.app_linux_parameters.initProcessEnabled, null)
     maxSwap            = try(var.app_linux_parameters.maxSwap, null)
     sharedMemorySize   = try(var.app_linux_parameters.sharedMemorySize, null)
     swappiness         = try(var.app_linux_parameters.swappiness, null)
-    tmpfs              = try(var.app_linux_parameters.tmpfs, [])
+    tmpfs              = tolist(try(var.app_linux_parameters.tmpfs, []))
   } : {
     capabilities = {
-      add  = ["SYS_PTRACE"]
-      drop = []
+      add  = tolist(["SYS_PTRACE"])
+      drop = tolist([])
     }
+    devices            = tolist([])
+    initProcessEnabled = null
+    maxSwap            = null
+    sharedMemorySize   = null
+    swappiness         = null
+    tmpfs              = tolist([])
   }
 
   # Build log configuration
