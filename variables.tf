@@ -11,7 +11,7 @@ variable "app_image" {
 
 variable "app_entrypoint" {
   type        = list(string)
-  description = "The entrypoint for the application container (will be wrapped by Falcon)"
+  description = "The entrypoint for the application container (will be wrapped by Falcon). If not specified, Falcon will attempt to wrap the image's default entrypoint. For best results, explicitly specify the entrypoint (e.g., [\"/docker-entrypoint.sh\"] for nginx)."
   default     = null
 }
 
@@ -158,6 +158,11 @@ variable "execution_role_arn" {
   type        = string
   description = "ARN of the task execution role. If not provided, one will be created"
   default     = null
+
+  validation {
+    condition     = var.execution_role_arn != null || var.create_execution_role
+    error_message = "Either execution_role_arn must be provided or create_execution_role must be true. Set create_execution_role = true to create a new execution role, or provide an existing role ARN via execution_role_arn."
+  }
 }
 
 variable "create_execution_role" {
@@ -311,41 +316,41 @@ variable "log_stream_prefix" {
 # Sidecar Containers
 variable "sidecar_containers" {
   type = list(object({
-    name                   = string
-    image                  = string
-    cpu                    = optional(number)
-    memory                 = optional(number)
-    memoryReservation      = optional(number)
-    essential              = optional(bool, false)
-    entryPoint             = optional(list(string))
-    command                = optional(list(string))
-    environment            = optional(list(object({
+    name              = string
+    image             = string
+    cpu               = optional(number)
+    memory            = optional(number)
+    memoryReservation = optional(number)
+    essential         = optional(bool, false)
+    entryPoint        = optional(list(string))
+    command           = optional(list(string))
+    environment = optional(list(object({
       name  = string
       value = string
     })), [])
-    secrets                = optional(list(object({
+    secrets = optional(list(object({
       name      = string
       valueFrom = string
     })), [])
-    portMappings           = optional(list(object({
+    portMappings = optional(list(object({
       containerPort = number
       hostPort      = optional(number)
       protocol      = optional(string)
     })), [])
-    mountPoints            = optional(list(object({
+    mountPoints = optional(list(object({
       sourceVolume  = string
       containerPath = string
       readOnly      = optional(bool)
     })), [])
-    volumesFrom            = optional(list(object({
+    volumesFrom = optional(list(object({
       sourceContainer = string
       readOnly        = optional(bool)
     })), [])
-    dependsOn              = optional(list(object({
+    dependsOn = optional(list(object({
       containerName = string
       condition     = string
     })), [])
-    healthCheck            = optional(object({
+    healthCheck = optional(object({
       command     = list(string)
       interval    = optional(number)
       timeout     = optional(number)
@@ -356,7 +361,7 @@ variable "sidecar_containers" {
     workingDirectory       = optional(string)
     readonlyRootFilesystem = optional(bool)
     privileged             = optional(bool)
-    linuxParameters        = optional(object({
+    linuxParameters = optional(object({
       capabilities = optional(object({
         add  = optional(list(string))
         drop = optional(list(string))

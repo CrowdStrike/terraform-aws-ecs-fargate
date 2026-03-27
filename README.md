@@ -55,7 +55,11 @@ This module creates an ECS task definition with:
 
 > **Note**: The Falcon sensor requires the `SYS_PTRACE` Linux capability to monitor processes. This module automatically adds this capability to your application container.
 
-> **Warning**: When using a read-only root filesystem (`app_readonly_root_filesystem = true`), ensure your application doesn't need to write to the root filesystem. The Falcon sensor files are mounted from a shared volume.
+> **Note**: When using a read-only root filesystem (`app_readonly_root_filesystem = true`), ensure your application doesn't need to write to the root filesystem. The Falcon sensor files are mounted from a shared volume.
+
+> **Note**: For best compatibility, explicitly specify the `app_entrypoint` variable with your container's entrypoint. If not specified, the module will attempt to wrap the container's default entrypoint, but this may not work for all images. Example: for nginx, use `app_entrypoint = ["/docker-entrypoint.sh"]`.
+
+> **Note**: The module supports both x86_64 (Intel/AMD) and ARM64 (Graviton) architectures. The correct Falcon loader is automatically selected based on the `runtime_platform.cpu_architecture` setting.
 
 ## Usage
 

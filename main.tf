@@ -7,17 +7,20 @@ data "aws_partition" "current" {}
 
 # Local variables
 locals {
-  log_group_name   = var.log_group_name != null ? var.log_group_name : "/ecs/${var.app_name}"
+  log_group_name    = var.log_group_name != null ? var.log_group_name : "/ecs/${var.app_name}"
   log_stream_prefix = var.log_stream_prefix != null ? var.log_stream_prefix : var.app_name
-  
+
   # Determine execution role ARN
   execution_role_arn = var.execution_role_arn != null ? var.execution_role_arn : (
     var.create_execution_role ? aws_iam_role.execution_role[0].arn : null
   )
 
+  # Determine loader path based on CPU architecture
+  ld_loader_path = var.runtime_platform.cpu_architecture == "ARM64" ? "/tmp/CrowdStrike/rootfs/lib64/ld-linux-aarch64.so.1" : "/tmp/CrowdStrike/rootfs/lib64/ld-linux-x86-64.so.2"
+
   # Build Falcon entrypoint wrapper
   falcon_entrypoint_base = [
-    "/tmp/CrowdStrike/rootfs/lib64/ld-linux-x86-64.so.2",
+    local.ld_loader_path,
     "--library-path",
     "/tmp/CrowdStrike/rootfs/lib64",
     "/tmp/CrowdStrike/rootfs/bin/bash",
@@ -27,13 +30,14 @@ locals {
   # Handle app entrypoint - convert to string if it's a list
   app_entrypoint_string = var.app_entrypoint != null ? (
     length(var.app_entrypoint) == 1 ? var.app_entrypoint[0] : join(" ", var.app_entrypoint)
-  ) : "/entrypoint.sh"
+  ) : null
 
   # Combine Falcon wrapper with app entrypoint
-  wrapped_entrypoint = concat(
+  # Only wrap if app_entrypoint is provided; otherwise, Falcon will wrap the container's default entrypoint
+  wrapped_entrypoint = local.app_entrypoint_string != null ? concat(
     local.falcon_entrypoint_base,
     [local.app_entrypoint_string]
-  )
+  ) : null
 
   # Merge Falcon environment with app environment
   app_environment_with_falcon = concat(
@@ -73,7 +77,7 @@ locals {
     sharedMemorySize   = try(var.app_linux_parameters.sharedMemorySize, null)
     swappiness         = try(var.app_linux_parameters.swappiness, null)
     tmpfs              = tolist(try(var.app_linux_parameters.tmpfs, []))
-  } : {
+    } : {
     capabilities = {
       add  = tolist(["SYS_PTRACE"])
       drop = tolist([])
@@ -254,9 +258,6 @@ resource "aws_ecs_task_definition" "task" {
           image     = var.app_image
           essential = true
 
-          entryPoint = local.wrapped_entrypoint
-          command    = var.app_command
-
           environment = local.app_environment_with_falcon
           secrets     = var.app_secrets
 
@@ -272,6 +273,8 @@ resource "aws_ecs_task_definition" "task" {
 
           linuxParameters = local.linux_parameters
         },
+        local.wrapped_entrypoint != null ? { entryPoint = local.wrapped_entrypoint } : {},
+        var.app_command != null ? { command = var.app_command } : {},
         var.app_user != null ? { user = var.app_user } : {},
         var.app_working_directory != null ? { workingDirectory = var.app_working_directory } : {},
         var.app_readonly_root_filesystem ? { readonlyRootFilesystem = true } : {},
