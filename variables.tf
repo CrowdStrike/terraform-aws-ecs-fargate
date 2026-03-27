@@ -138,6 +138,12 @@ variable "app_memory_reservation" {
   default     = null
 }
 
+variable "app_stop_timeout" {
+  type        = number
+  description = "Time duration (in seconds) to wait before the container is forcefully killed if it doesn't exit normally on its own. ECS default is 30 seconds."
+  default     = null
+}
+
 # Task Configuration
 variable "task_cpu" {
   type        = string
@@ -291,7 +297,7 @@ variable "falcon_additional_opts" {
 variable "falcon_init_timeout" {
   type        = number
   description = "Timeout in seconds for the Falcon init container to complete"
-  default     = 60
+  default     = 120
 }
 
 variable "falcon_init_cpu" {
@@ -353,6 +359,12 @@ variable "enable_execute_command" {
   type        = bool
   description = "Enable ECS Exec for debugging (allows running commands in containers). Requires task role with SSM permissions."
   default     = false
+}
+
+variable "platform_version" {
+  type        = string
+  description = "Fargate platform version to use for the ECS service. Use this value when creating your ECS service. Defaults to LATEST."
+  default     = "LATEST"
 }
 
 # Sidecar Containers

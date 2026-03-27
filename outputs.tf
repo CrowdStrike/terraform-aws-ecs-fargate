@@ -47,3 +47,8 @@ output "enable_execute_command" {
   description = "Whether ECS Exec is enabled (use this value when creating ECS service)"
   value       = var.enable_execute_command
 }
+
+output "platform_version" {
+  description = "Fargate platform version to use (use this value when creating ECS service)"
+  value       = var.platform_version
+}

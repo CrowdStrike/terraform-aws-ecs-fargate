@@ -279,6 +279,7 @@ resource "aws_ecs_task_definition" "task" {
         var.app_cpu != null ? { cpu = var.app_cpu } : {},
         var.app_memory != null ? { memory = var.app_memory } : {},
         var.app_memory_reservation != null ? { memoryReservation = var.app_memory_reservation } : {},
+        var.app_stop_timeout != null ? { stopTimeout = var.app_stop_timeout } : {},
         local.wrapped_entrypoint != null ? { entryPoint = local.wrapped_entrypoint } : {},
         var.app_command != null ? { command = var.app_command } : {},
         var.app_user != null ? { user = var.app_user } : {},
