@@ -210,6 +210,8 @@ resource "aws_ecs_service" "app" {
 
 | Name | Description |
 |------|-------------|
+| <a name="output_cloudwatch_log_group_name"></a> [cloudwatch\_log\_group\_name](#output\_cloudwatch\_log\_group\_name) | CloudWatch log group name for monitoring/alerting (same as log\_group\_name, but semantic alias) |
+| <a name="output_cloudwatch_metric_namespace"></a> [cloudwatch\_metric\_namespace](#output\_cloudwatch\_metric\_namespace) | Recommended CloudWatch metric namespace for custom application metrics |
 | <a name="output_container_name"></a> [container\_name](#output\_container\_name) | Name of the application container |
 | <a name="output_enable_execute_command"></a> [enable\_execute\_command](#output\_enable\_execute\_command) | Whether ECS Exec is enabled (use this value when creating ECS service) |
 | <a name="output_execution_role_arn"></a> [execution\_role\_arn](#output\_execution\_role\_arn) | ARN of the ECS execution role |
@@ -221,4 +223,5 @@ resource "aws_ecs_service" "app" {
 | <a name="output_task_definition_arn"></a> [task\_definition\_arn](#output\_task\_definition\_arn) | Full ARN of the Task Definition (including revision) |
 | <a name="output_task_definition_family"></a> [task\_definition\_family](#output\_task\_definition\_family) | Family of the Task Definition |
 | <a name="output_task_definition_revision"></a> [task\_definition\_revision](#output\_task\_definition\_revision) | Revision of the Task Definition |
+| <a name="output_task_family_name"></a> [task\_family\_name](#output\_task\_family\_name) | Task definition family name for CloudWatch metric dimensions |
 <!-- END_TF_DOCS -->

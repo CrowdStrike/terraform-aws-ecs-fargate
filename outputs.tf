@@ -52,3 +52,18 @@ output "platform_version" {
   description = "Fargate platform version to use (use this value when creating ECS service)"
   value       = var.platform_version
 }
+
+output "cloudwatch_log_group_name" {
+  description = "CloudWatch log group name for monitoring/alerting (same as log_group_name, but semantic alias)"
+  value       = var.enable_logging ? local.log_group_name : null
+}
+
+output "task_family_name" {
+  description = "Task definition family name for CloudWatch metric dimensions"
+  value       = var.app_name
+}
+
+output "cloudwatch_metric_namespace" {
+  description = "Recommended CloudWatch metric namespace for custom application metrics"
+  value       = "ECS/ContainerInsights"
+}
