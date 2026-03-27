@@ -1,0 +1,15 @@
+app_name  = "demo-app"
+app_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/test-webapp:latest"
+
+falcon_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/test-falcon-container-sensor:latest"
+falcon_cid   = "YOUR-CID-HERE-12345678901234567890123456789012-AB"
+
+app_port = 8080
+
+task_cpu    = "512"
+task_memory = "1024"
+
+tags = {
+  Environment = "demo"
+  ManagedBy   = "terraform"
+}

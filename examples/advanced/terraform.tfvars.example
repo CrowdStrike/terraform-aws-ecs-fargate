@@ -1,0 +1,34 @@
+app_name  = "advanced-demo-app"
+app_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/test-webapp:latest"
+
+falcon_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/test-falcon-container-sensor:latest"
+falcon_cid   = "YOUR-CID-HERE-12345678901234567890123456789012-AB"
+
+environment = "production"
+
+app_port     = 8080
+metrics_port = 9090
+
+task_cpu    = "1024"
+task_memory = "2048"
+
+# ARN of existing ECS execution role
+execution_role_arn = "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
+
+# ARN of existing ECS task role
+task_role_arn = "arn:aws:iam::123456789012:role/ecsTaskRole"
+
+# ARN of Secrets Manager secret containing database password
+db_password_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secret:db-password-AbCdEf"
+
+# ARN of Secrets Manager secret containing API key
+api_key_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secret:api-key-XyZ123"
+
+# EFS file system ID for application data
+efs_file_system_id = "fs-12345678"
+
+tags = {
+  Environment = "production"
+  ManagedBy   = "terraform"
+  Application = "advanced-demo"
+}
