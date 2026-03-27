@@ -61,6 +61,10 @@ This module creates an ECS task definition with:
 
 > **Note**: The module supports both x86_64 (Intel/AMD) and ARM64 (Graviton) architectures. The correct Falcon loader is automatically selected based on the `runtime_platform.cpu_architecture` setting.
 
+> **Tip**: Set container-level resource limits using `app_cpu` and `app_memory` variables to prevent your application from consuming all task resources. The Falcon init container uses 256 CPU units and 512 MB memory by default.
+
+> **Tip**: Enable CloudWatch Logs encryption by providing a KMS key ARN via `log_group_kms_key_id` for compliance with security requirements.
+
 ## Usage
 
 ```hcl

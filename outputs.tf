@@ -42,3 +42,8 @@ output "container_name" {
   description = "Name of the application container"
   value       = var.app_name
 }
+
+output "enable_execute_command" {
+  description = "Whether ECS Exec is enabled (use this value when creating ECS service)"
+  value       = var.enable_execute_command
+}

@@ -120,6 +120,24 @@ variable "app_privileged" {
   default     = false
 }
 
+variable "app_cpu" {
+  type        = number
+  description = "CPU units to allocate to the application container (not the entire task). If not specified, no container-level CPU limit is set."
+  default     = null
+}
+
+variable "app_memory" {
+  type        = number
+  description = "Memory (in MB) to allocate to the application container (hard limit). If not specified, no container-level memory limit is set."
+  default     = null
+}
+
+variable "app_memory_reservation" {
+  type        = number
+  description = "Soft memory limit (in MB) for the application container. Container will try to stay below this limit."
+  default     = null
+}
+
 # Task Configuration
 variable "task_cpu" {
   type        = string
@@ -276,6 +294,18 @@ variable "falcon_init_timeout" {
   default     = 60
 }
 
+variable "falcon_init_cpu" {
+  type        = number
+  description = "CPU units to allocate to the Falcon init container"
+  default     = 256
+}
+
+variable "falcon_init_memory" {
+  type        = number
+  description = "Memory (in MB) to allocate to the Falcon init container"
+  default     = 512
+}
+
 variable "falcon_volume_name" {
   type        = string
   description = "Name of the volume used for Falcon sensor files"
@@ -304,13 +334,25 @@ variable "create_log_group" {
 variable "log_retention_days" {
   type        = number
   description = "Number of days to retain logs in CloudWatch"
-  default     = 7
+  default     = 30
+}
+
+variable "log_group_kms_key_id" {
+  type        = string
+  description = "ARN of the KMS key to use for encrypting CloudWatch log data. If not specified, logs will use default encryption."
+  default     = null
 }
 
 variable "log_stream_prefix" {
   type        = string
   description = "Log stream prefix for the application container"
   default     = null
+}
+
+variable "enable_execute_command" {
+  type        = bool
+  description = "Enable ECS Exec for debugging (allows running commands in containers). Requires task role with SSM permissions."
+  default     = false
 }
 
 # Sidecar Containers

@@ -120,6 +120,7 @@ resource "aws_cloudwatch_log_group" "ecs_log_group" {
 
   name              = local.log_group_name
   retention_in_days = var.log_retention_days
+  kms_key_id        = var.log_group_kms_key_id
 
   tags = var.tags
 }
@@ -234,6 +235,8 @@ resource "aws_ecs_task_definition" "task" {
         image     = var.falcon_image
         user      = "0:0"
         essential = false
+        cpu       = var.falcon_init_cpu
+        memory    = var.falcon_init_memory
 
         entryPoint = [
           "/bin/bash",
@@ -273,6 +276,9 @@ resource "aws_ecs_task_definition" "task" {
 
           linuxParameters = local.linux_parameters
         },
+        var.app_cpu != null ? { cpu = var.app_cpu } : {},
+        var.app_memory != null ? { memory = var.app_memory } : {},
+        var.app_memory_reservation != null ? { memoryReservation = var.app_memory_reservation } : {},
         local.wrapped_entrypoint != null ? { entryPoint = local.wrapped_entrypoint } : {},
         var.app_command != null ? { command = var.app_command } : {},
         var.app_user != null ? { user = var.app_user } : {},
@@ -314,4 +320,8 @@ resource "aws_ecs_task_definition" "task" {
   ))
 
   tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
