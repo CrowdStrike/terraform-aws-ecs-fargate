@@ -90,8 +90,8 @@ locals {
     tmpfs              = tolist([])
   }
 
-  # Build log configuration
-  log_configuration = var.enable_logging ? {
+  # Default awslogs configuration — used by sidecars and as the app container fallback
+  default_log_configuration = var.enable_logging ? {
     logDriver = "awslogs"
     options = {
       "awslogs-group"         = var.create_log_group ? aws_cloudwatch_log_group.ecs_log_group[0].name : local.log_group_name
@@ -99,6 +99,11 @@ locals {
       "awslogs-stream-prefix" = local.log_stream_prefix
     }
   } : null
+
+  # App container log configuration — prefer app_log_configuration if provided, otherwise use default
+  log_configuration = var.enable_logging ? (
+    var.app_log_configuration != null ? var.app_log_configuration : local.default_log_configuration
+  ) : null
 
   # Add Falcon volume to user-provided volumes
   all_volumes = concat(
@@ -315,7 +320,10 @@ resource "aws_ecs_task_definition" "task" {
         container.readonlyRootFilesystem != null ? { readonlyRootFilesystem = container.readonlyRootFilesystem } : {},
         container.privileged != null ? { privileged = container.privileged } : {},
         container.linuxParameters != null ? { linuxParameters = container.linuxParameters } : {},
-        local.log_configuration != null ? { logConfiguration = local.log_configuration } : {}
+        container.firelensConfiguration != null ? { firelensConfiguration = container.firelensConfiguration } : {},
+        container.logConfiguration != null ? { logConfiguration = container.logConfiguration } : (
+          local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
+        )
       )
     ]
   ))
