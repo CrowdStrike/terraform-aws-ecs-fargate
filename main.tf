@@ -288,9 +288,8 @@ resource "aws_ecs_task_definition" "task" {
         var.app_readonly_root_filesystem ? { readonlyRootFilesystem = true } : {},
         var.app_privileged ? { privileged = true } : {},
         var.app_health_check != null ? { healthCheck = var.app_health_check } : {},
-        var.app_log_configuration != null ? { logConfiguration = var.app_log_configuration } : (
-          local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
-        )
+        var.app_log_configuration != null ? { logConfiguration = var.app_log_configuration } : {},
+        var.app_log_configuration == null && local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
       )
     ],
     # Sidecar Containers
@@ -319,9 +318,8 @@ resource "aws_ecs_task_definition" "task" {
         container.privileged != null ? { privileged = container.privileged } : {},
         container.linuxParameters != null ? { linuxParameters = container.linuxParameters } : {},
         container.firelensConfiguration != null ? { firelensConfiguration = container.firelensConfiguration } : {},
-        container.logConfiguration != null ? { logConfiguration = container.logConfiguration } : (
-          local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
-        )
+        container.logConfiguration != null ? { logConfiguration = container.logConfiguration } : {},
+        container.logConfiguration == null && local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
       )
     ]
   ))
