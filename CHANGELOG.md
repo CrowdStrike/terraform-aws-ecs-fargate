@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`app_log_configuration`** variable: overrides the app container log driver. When `enable_logging = true` and this is set, it takes precedence over the default `awslogs` configuration. Enables FireLens (`awsfirelens`) or any other ECS-supported log driver without disabling CloudWatch logging for sidecars. Supports the full AWS `logConfiguration` type (`logDriver`, `options`, `secretOptions`).
+- **`sidecar_containers[*].firelensConfiguration`**: declares a sidecar container as a FireLens log router (`type = "fluentbit"` or `"fluentd"`). Supports the full AWS `firelensConfiguration` type (`type`, `options`).
+- **`sidecar_containers[*].logConfiguration`**: per-sidecar log driver override. When set, takes precedence over the shared `awslogs` default. When omitted, existing fallback behaviour is unchanged.
+
+All new fields are optional with `null`/empty defaults — fully backwards compatible.
+
+---
+
 Initial release of the CrowdStrike Falcon ECS Fargate Terraform module.
 
 ### Features
