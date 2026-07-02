@@ -100,10 +100,6 @@ locals {
     }
   } : null
 
-  # App container log configuration — prefer app_log_configuration if provided, otherwise use default
-  log_configuration = var.enable_logging ? (
-    var.app_log_configuration != null ? var.app_log_configuration : local.default_log_configuration
-  ) : null
 
   # Add Falcon volume to user-provided volumes
   all_volumes = concat(
@@ -292,7 +288,9 @@ resource "aws_ecs_task_definition" "task" {
         var.app_readonly_root_filesystem ? { readonlyRootFilesystem = true } : {},
         var.app_privileged ? { privileged = true } : {},
         var.app_health_check != null ? { healthCheck = var.app_health_check } : {},
-        local.log_configuration != null ? { logConfiguration = local.log_configuration } : {}
+        var.app_log_configuration != null ? { logConfiguration = var.app_log_configuration } : (
+          local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
+        )
       )
     ],
     # Sidecar Containers
