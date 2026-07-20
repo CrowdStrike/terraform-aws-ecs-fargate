@@ -90,8 +90,8 @@ locals {
     tmpfs              = tolist([])
   }
 
-  # Build log configuration
-  log_configuration = var.enable_logging ? {
+  # Default awslogs configuration — used by sidecars and as the app container fallback
+  default_log_configuration = var.enable_logging ? {
     logDriver = "awslogs"
     options = {
       "awslogs-group"         = var.create_log_group ? aws_cloudwatch_log_group.ecs_log_group[0].name : local.log_group_name
@@ -99,6 +99,7 @@ locals {
       "awslogs-stream-prefix" = local.log_stream_prefix
     }
   } : null
+
 
   # Add Falcon volume to user-provided volumes
   all_volumes = concat(
@@ -287,7 +288,8 @@ resource "aws_ecs_task_definition" "task" {
         var.app_readonly_root_filesystem ? { readonlyRootFilesystem = true } : {},
         var.app_privileged ? { privileged = true } : {},
         var.app_health_check != null ? { healthCheck = var.app_health_check } : {},
-        local.log_configuration != null ? { logConfiguration = local.log_configuration } : {}
+        var.app_log_configuration != null ? { logConfiguration = var.app_log_configuration } : {},
+        var.app_log_configuration == null && local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
       )
     ],
     # Sidecar Containers
@@ -315,7 +317,9 @@ resource "aws_ecs_task_definition" "task" {
         container.readonlyRootFilesystem != null ? { readonlyRootFilesystem = container.readonlyRootFilesystem } : {},
         container.privileged != null ? { privileged = container.privileged } : {},
         container.linuxParameters != null ? { linuxParameters = container.linuxParameters } : {},
-        local.log_configuration != null ? { logConfiguration = local.log_configuration } : {}
+        container.firelensConfiguration != null ? { firelensConfiguration = container.firelensConfiguration } : {},
+        container.logConfiguration != null ? { logConfiguration = container.logConfiguration } : {},
+        container.logConfiguration == null && local.default_log_configuration != null ? { logConfiguration = local.default_log_configuration } : {}
       )
     ]
   ))

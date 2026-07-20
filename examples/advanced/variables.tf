@@ -75,6 +75,11 @@ variable "efs_file_system_id" {
   description = "EFS file system ID for application data"
 }
 
+variable "datadog_api_key_secret_arn" {
+  type        = string
+  description = "ARN of SSM Parameter Store or Secrets Manager secret containing the Datadog API key"
+}
+
 variable "tags" {
   type        = map(string)
   description = "Resource tags"

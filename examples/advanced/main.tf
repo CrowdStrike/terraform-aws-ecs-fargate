@@ -72,6 +72,22 @@ module "falcon_ecs_task" {
 
   log_retention_days = 30
 
+  # Route app container logs via FireLens to an external backend.
+  # Sidecars that omit logConfiguration fall back to awslogs automatically.
+  app_log_configuration = {
+    logDriver = "awsfirelens"
+    options = {
+      Name     = "datadog"
+      Host     = "http-intake.logs.datadoghq.com"
+      TLS      = "on"
+      compress = "gzip"
+      provider = "ecs"
+    }
+    secretOptions = [
+      { name = "apikey", valueFrom = var.datadog_api_key_secret_arn }
+    ]
+  }
+
   volumes = [
     {
       name = "app-data"
@@ -85,21 +101,12 @@ module "falcon_ecs_task" {
   sidecar_containers = [
     {
       name      = "log-router"
-      image     = "fluent/fluent-bit:2.0"
+      image     = "public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"
       essential = false
-      environment = [
-        {
-          name  = "FLB_LOG_LEVEL"
-          value = "info"
-        }
-      ]
-      mountPoints = [
-        {
-          sourceVolume  = "app-data"
-          containerPath = "/fluent-bit/logs"
-          readOnly      = true
-        }
-      ]
+      firelensConfiguration = {
+        type = "fluentbit"
+      }
+      # Sidecar's own logs go to CloudWatch (default awslogs fallback)
     }
   ]
 

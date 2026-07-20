@@ -144,6 +144,19 @@ variable "app_stop_timeout" {
   default     = null
 }
 
+variable "app_log_configuration" {
+  type = object({
+    logDriver = string
+    options   = optional(map(string), {})
+    secretOptions = optional(list(object({
+      name      = string
+      valueFrom = string
+    })), [])
+  })
+  description = "Log configuration for the application container. If not specified, defaults to awslogs via enable_logging/log_group_name."
+  default     = null
+}
+
 # Task Configuration
 variable "task_cpu" {
   type        = string
@@ -420,6 +433,18 @@ variable "sidecar_containers" {
         add  = optional(list(string))
         drop = optional(list(string))
       }))
+    }))
+    firelensConfiguration = optional(object({
+      type    = string
+      options = optional(map(string), {})
+    }))
+    logConfiguration = optional(object({
+      logDriver = string
+      options   = optional(map(string), {})
+      secretOptions = optional(list(object({
+        name      = string
+        valueFrom = string
+      })), [])
     }))
   }))
   description = "Additional sidecar containers to include in the task"
