@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Read-only root filesystem support**: with `app_readonly_root_filesystem = true`, the application container previously exited at start-up with `mkdir: cannot create directory '/tmp/CrowdStrike-private': Read-only file system`, because the Falcon sensor needs a writable private directory. The module now adds a `crowdstrike-private-<app_name>` volume, mounts it at `/tmp/CrowdStrike-private` in the application container, and has the init container make it writable. This matches what the Falcon patching utility generates for read-only tasks. The output is unchanged when `app_readonly_root_filesystem = false` (the default).
+
 ### Added
 
 - **`app_log_configuration`** variable: overrides the app container log driver. When `enable_logging = true` and this is set, it takes precedence over the default `awslogs` configuration. Enables FireLens (`awsfirelens`) or any other ECS-supported log driver without disabling CloudWatch logging for sidecars. Supports the full AWS `logConfiguration` type (`logDriver`, `options`, `secretOptions`).

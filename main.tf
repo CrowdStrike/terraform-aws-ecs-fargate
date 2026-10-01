@@ -50,7 +50,12 @@ locals {
     ]
   )
 
-  # Add Falcon volume to mount points
+  # With a read-only root filesystem the sensor can't create /tmp/CrowdStrike-private itself, so,
+  # like the Falcon patching utility, add a private volume that the init container makes writable
+  falcon_private_volume_name = "crowdstrike-private-${var.app_name}"
+  falcon_private_init_path   = "/tmp/CrowdStrike-private-${var.app_name}"
+
+  # Add Falcon volume (and, for a read-only root filesystem, the private volume) to mount points
   app_mount_points_with_falcon = concat(
     var.app_mount_points,
     [
@@ -59,8 +64,25 @@ locals {
         containerPath = "/tmp/CrowdStrike"
         readOnly      = false
       }
-    ]
+    ],
+    var.app_readonly_root_filesystem ? [
+      {
+        sourceVolume  = local.falcon_private_volume_name
+        containerPath = "/tmp/CrowdStrike-private"
+        readOnly      = false
+      }
+    ] : []
   )
+
+  falcon_init_command = join(" && ", concat(
+    [
+      "chmod u+rwx /tmp/CrowdStrike",
+      "mkdir /tmp/CrowdStrike/rootfs",
+      "cp -r /bin /etc /lib64 /usr /entrypoint-ecs.sh /tmp/CrowdStrike/rootfs",
+      "chmod -R a=rX /tmp/CrowdStrike"
+    ],
+    var.app_readonly_root_filesystem ? ["chmod -R a=rwX ${local.falcon_private_init_path}"] : []
+  ))
 
   # Merge SYS_PTRACE capability with any user-provided capabilities
   linux_parameters = var.app_linux_parameters != null ? {
@@ -101,7 +123,7 @@ locals {
   } : null
 
 
-  # Add Falcon volume to user-provided volumes
+  # Add Falcon volume (and, for a read-only root filesystem, the private volume) to user-provided volumes
   all_volumes = concat(
     var.volumes,
     [
@@ -111,7 +133,15 @@ locals {
         docker_volume_configuration = null
         efs_volume_configuration    = null
       }
-    ]
+    ],
+    var.app_readonly_root_filesystem ? [
+      {
+        name                        = local.falcon_private_volume_name
+        host_path                   = null
+        docker_volume_configuration = null
+        efs_volume_configuration    = null
+      }
+    ] : []
   )
 }
 
@@ -242,16 +272,25 @@ resource "aws_ecs_task_definition" "task" {
         entryPoint = [
           "/bin/bash",
           "-c",
-          "chmod u+rwx /tmp/CrowdStrike && mkdir /tmp/CrowdStrike/rootfs && cp -r /bin /etc /lib64 /usr /entrypoint-ecs.sh /tmp/CrowdStrike/rootfs && chmod -R a=rX /tmp/CrowdStrike"
+          local.falcon_init_command
         ]
 
-        mountPoints = [
-          {
-            containerPath = "/tmp/CrowdStrike"
-            sourceVolume  = var.falcon_volume_name
-            readOnly      = false
-          }
-        ]
+        mountPoints = concat(
+          [
+            {
+              containerPath = "/tmp/CrowdStrike"
+              sourceVolume  = var.falcon_volume_name
+              readOnly      = false
+            }
+          ],
+          var.app_readonly_root_filesystem ? [
+            {
+              containerPath = local.falcon_private_init_path
+              sourceVolume  = local.falcon_private_volume_name
+              readOnly      = false
+            }
+          ] : []
+        )
 
         startTimeout = var.falcon_init_timeout
       },
